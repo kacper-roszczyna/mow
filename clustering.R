@@ -37,3 +37,26 @@ ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x, for_clustering$Walc.
   ggplot2::geom_count() + 
   ggplot2::geom_point(mapping=ggplot2::aes(k_means_centers$Dalc, k_means_centers$Walc), color="red")
 
+#mean shift clustering
+install.packages("MeanShift")
+means_data = t(for_clustering)
+# This shows that simple means shift doesn't do so well. So let's try ramping it up a bit
+means_clusters = MeanShift::msClustering(means_data)
+plot( means_data[1,], means_data[2,], col=means_clusters$labels+2, cex=0.8,
+      pch=16, xlab="Dalc", ylab="Walc" )
+points( means_clusters$components[1,], means_clusters$components[2,],
+        col=2+( 1:ncol( means_clusters$components ) ), cex=1.8, pch=16 )
+#This really doesn't look that much OK
+h_factor=quantile( dist( t( means_data ) ), 0.53727 )
+means_clusters = MeanShift::msClustering(means_data, h = h_factor)
+plot( means_data[1,], means_data[2,], col=means_clusters$labels+2, cex=0.8,
+      pch=16, xlab="Dalc", ylab="Walc" )
+points( means_clusters$components[1,], means_clusters$components[2,],
+        col=2+( 1:ncol( means_clusters$components ) ), cex=1.8, pch=16 )
+#Neither does this though :/
+h_factor=quantile( dist( t( means_data ) ), 0.53726 )
+means_clusters = MeanShift::msClustering(means_data, h = h_factor)
+plot( means_data[1,], means_data[2,], col=means_clusters$labels+2, cex=0.8,
+      pch=16, xlab="Dalc", ylab="Walc" )
+points( means_clusters$components[1,], means_clusters$components[2,],
+        col=2+( 1:ncol( means_clusters$components ) ), cex=1.8, pch=16 )
