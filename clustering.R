@@ -60,3 +60,6 @@ plot( means_data[1,], means_data[2,], col=means_clusters$labels+2, cex=0.8,
       pch=16, xlab="Dalc", ylab="Walc" )
 points( means_clusters$components[1,], means_clusters$components[2,],
         col=2+( 1:ncol( means_clusters$components ) ), cex=1.8, pch=16 )
+
+install.packages("dbscan")
+dbscan::dbscan()
