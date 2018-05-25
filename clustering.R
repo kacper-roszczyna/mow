@@ -1,8 +1,10 @@
 install.packages("ggplot2")
-d1=read.table("student-mat.csv",sep=";",header=TRUE)
-d2=read.table("student-por.csv",sep=";",header=TRUE)
+d1=read.table("student-mat.csv",sep=",",header=TRUE)
+d2=read.table("student-por.csv",sep=",",header=TRUE)
 
-d3=merge(d1,d2,by=c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
+d3=merge(d1,d2,
+         by.x=c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"),
+         by.y=c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
 print(nrow(d3)) # 382 students
 
 #general data overwiev before clustering
@@ -17,4 +19,21 @@ boxplot(for_clustering$Dalc.x)
 boxplot(for_clustering$Walc.x)
 boxplot(for_clustering$Dalc.x+for_clustering$Walc.x)
 
+#simple plot
 plot(for_clustering$Dalc.x, for_clustering$Walc.x)
+#density plot
+ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x, for_clustering$Walc.x)) + 
+  ggplot2::geom_count()
+
+#k-means
+k_means_results = kmeans(x = for_clustering, 
+                         centers = 2, 
+                         iter.max = 500, 
+                         nstart = 1, 
+                         algorithm = c("Hartigan-Wong", "Lloyd", "Forgy","MacQueen"), 
+                         trace=FALSE)
+k_means_centers = data.frame(matrix(unlist(k_means_results[2]), nrow=2, ncol = 2, byrow=F, dimnames = list(c(1, 2), c("Dalc", "Walc"))))
+ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x, for_clustering$Walc.x)) + 
+  ggplot2::geom_count() + 
+  ggplot2::geom_point(mapping=ggplot2::aes(k_means_centers$Dalc, k_means_centers$Walc), color="red")
+
