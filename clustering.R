@@ -61,5 +61,9 @@ plot( means_data[1,], means_data[2,], col=means_clusters$labels+2, cex=0.8,
 points( means_clusters$components[1,], means_clusters$components[2,],
         col=2+( 1:ncol( means_clusters$components ) ), cex=1.8, pch=16 )
 
+#This won't work
 install.packages("dbscan")
-dbscan::dbscan()
+db_clusters1 = dbscan::dbscan(for_clustering, 1)
+plot(for_clustering[,1], for_clustering[,2], pch=16, col=db_clusters1$cluster, xlab="Dalc", ylab="Walc")
+db_clusters1 = dbscan::dbscan(for_clustering, 0.1)
+plot(for_clustering[,1], for_clustering[,2], pch=16, col=db_clusters1$cluster, xlab="Dalc", ylab="Walc")
