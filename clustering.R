@@ -82,3 +82,6 @@ dclu$label <- paste(as.character(dclu$D), as.character(dclu$W), sep = "_")
 hclusters = hclust(dist(dclu2), "complete")
 plot(hclusters, labels=dclu$label, hang = -1, cex=0.6 )
 
+#EM clustering
+install.packages("EMCluster")
+library(EMCluster)
