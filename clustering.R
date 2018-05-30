@@ -85,3 +85,9 @@ plot(hclusters, labels=dclu$label, hang = -1, cex=0.6 )
 #EM clustering
 install.packages("EMCluster")
 library(EMCluster)
+emclust_data <- for_clustering
+ret <- EMCluster::init.EM(emclust_data, nclass = 2)
+ret.new <- EMCluster::assign.class(emclust_data, ret, return.all = FALSE)
+str(ret.new)
+emclust_data$cluster = ret.new$class
+plot(emclust_data[,1], emclust_data[,2], pch=16, col=emclust_data$cluster, xlab="Dalc", ylab="Walc")
