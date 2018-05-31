@@ -28,9 +28,15 @@ ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Walc.x+for_clustering$Dalc.x
   ggplot2::labs(x = "Amount drunk", title = "Total alcohol consumption")
 
 #boxplots
-boxplot(for_clustering$Dalc.x)
-boxplot(for_clustering$Walc.x)
-boxplot(for_clustering$Dalc.x+for_clustering$Walc.x)
+ggplot2::ggplot(mapping = ggplot2::aes(x = "daily", y= for_clustering$Dalc.x)) +
+  ggplot2::stat_boxplot() +
+  ggplot2::labs(title = "Daily alcohol consumption", y="amount")
+ggplot2::ggplot(mapping = ggplot2::aes(x = "weekend", y= for_clustering$Walc.x)) +
+  ggplot2::stat_boxplot() +
+  ggplot2::labs(title = "Weekendly alcohol consumption", y="amount")
+ggplot2::ggplot(mapping = ggplot2::aes(x = "total", y= for_clustering$Dalc.x+for_clustering$Walc.x)) +
+  ggplot2::stat_boxplot() +
+  ggplot2::labs(title = "Total alcohol consumption", y="amount")
 
 #simple plot
 plot(for_clustering$Dalc.x, for_clustering$Walc.x)
