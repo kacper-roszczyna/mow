@@ -1,18 +1,31 @@
+#used for more advanced visualization
 install.packages("ggplot2")
+#import data set
 d1=read.table("student-mat.csv",sep=",",header=TRUE)
 d2=read.table("student-por.csv",sep=",",header=TRUE)
-
+#merge data excluding duplicates of students
 d3=merge(d1,d2,
          by.x=c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"),
          by.y=c("school","sex","age","address","famsize","Pstatus","Medu","Fedu","Mjob","Fjob","reason","nursery","internet"))
 print(nrow(d3)) # 382 students
 
 #general data overwiev before clustering
+#separate out data for clustering
 for_clustering=d3[c("Dalc.x", "Walc.x")]
-#histograms
-hist(for_clustering$Dalc.x)
-hist(for_clustering$Walc.x)
-hist(for_clustering$Dalc.x+for_clustering$Walc.x)
+#bar plots of student drinking habits
+ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x), 
+                colnames = c("1", "2", "3", "4", "5")) + 
+  ggplot2::geom_bar() + 
+  ggplot2::labs(x = "Amount drunk", title = "Daily alcohol consumption")
+
+ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Walc.x), 
+                colnames = c("1", "2", "3", "4", "5")) + 
+  ggplot2::geom_bar() + 
+  ggplot2::labs(x = "Amount drunk", title = "Weekend alcohol consumption")
+ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Walc.x+for_clustering$Dalc.x),
+                colnames = c("2", "3", "4", "5", "6", "7", "8", "9", "10")) + 
+  ggplot2::geom_bar() +
+  ggplot2::labs(x = "Amount drunk", title = "Total alcohol consumption")
 
 #boxplots
 boxplot(for_clustering$Dalc.x)
