@@ -38,23 +38,50 @@ ggplot2::ggplot(mapping = ggplot2::aes(x = "total", y= for_clustering$Dalc.x+for
   ggplot2::stat_boxplot() +
   ggplot2::labs(title = "Total alcohol consumption", y="amount")
 
-#simple plot
-plot(for_clustering$Dalc.x, for_clustering$Walc.x)
 #density plot
 ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x, for_clustering$Walc.x)) + 
-  ggplot2::geom_count()
+  ggplot2::geom_count() +
+  ggplot2::scale_size_area() +
+  ggplot2::labs(title = "Density plot of students alcohol consumption",x="Daily alcohol consumption", y="Weekend alcohol consumption") +
+  ggplot2::coord_fixed()
 
 #k-means
-k_means_results = kmeans(x = for_clustering, 
-                         centers = 2, 
-                         iter.max = 500, 
-                         nstart = 1, 
-                         algorithm = c("Hartigan-Wong", "Lloyd", "Forgy","MacQueen"), 
-                         trace=FALSE)
-k_means_centers = data.frame(matrix(unlist(k_means_results[2]), nrow=2, ncol = 2, byrow=F, dimnames = list(c(1, 2), c("Dalc", "Walc"))))
-ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x, for_clustering$Walc.x)) + 
-  ggplot2::geom_count() + 
-  ggplot2::geom_point(mapping=ggplot2::aes(k_means_centers$Dalc, k_means_centers$Walc), color="red")
+## preparing parameters for the algorithm
+iterations = c(1, 5, 10, 25, 50, 100, 150, 200, 250, 400, 500, 750, 1000, 1250, 1500, 2000, 2500, 3000, 5000, 10000)
+algorithms = c("Hartigan-Wong", "Lloyd", "Forgy", "MacQueen")
+n_starts = c(1, 3, 5, 10, 15, 25, 50)
+parameters = c()
+parameters$iterations = sort(as.numeric(rep(iterations, length(algorithms)*length(n_starts))))
+parameters$algorithms = rep(algorithms, length(iterations)*length(n_starts))
+parameters$n_starts = rep(n_starts, length(iterations)*length(algorithms))
+parameters = data.frame(matrix(unlist(parameters), ncol = 3, dimnames = list(c(), c("iterations", "algorithm", "n_starts"))))
+parameters$iterations = as.integer(as.character(parameters$iterations))
+parameters$n_starts = as.integer(as.character(parameters$n_starts))
+parameters = parameters[order(parameters[,1], parameters[,2], parameters[,3]),]
+
+#Run the algorithm for each parameter
+by(parameters, 1:nrow(parameters), function(row){
+  print(row)
+  k_means_results = kmeans(x = for_clustering, 
+                           centers = 2, 
+                           iter.max = row$iterations, 
+                           nstart = row$n_starts, 
+                           algorithm = c(as.character(row$algorithm)), 
+                           trace=FALSE)
+  k_means_centers = data.frame(matrix(unlist(k_means_results[2]), nrow=2, ncol = 2, byrow=F, dimnames = list(c(1, 2), c("Dalc", "Walc"))))
+  print(k_means_centers)
+  ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x, for_clustering$Walc.x, color=k_means_results$cluster)) + 
+    ggplot2::geom_count() + 
+    ggplot2::geom_point(mapping=ggplot2::aes(k_means_centers$Dalc, k_means_centers$Walc, color=c(1,2)), shape=18, size=7) +
+    ggplot2::labs(title = "Alcohol consumption clustering", 
+                  subtitle = paste("max iterations:", as.character(row$iterations), "\t",
+                                   "algorithm used:", as.character(row$algorithm),  "\t",
+                                   "starting clusters:", as.character(row$n_starts), sep = " "),
+                  y="Weekend consumption",
+                  x="Daily consumption") +
+    ggplot2::coord_fixed()
+  ggplot2::ggsave(paste("img/kmeans/kmeans", as.character(row$iterations), as.character(row$algorithm), as.character(row$n_starts), ".png", sep="_"))
+})
 
 #mean shift clustering
 install.packages("MeanShift")
