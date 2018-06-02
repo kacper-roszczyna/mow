@@ -3,17 +3,27 @@
 #Loading the library
 library(klaR)
 
-#d1 = subset(d1, select = -c(school) )
+trainSet<-d1
+testSet<-d2
+validationSet<-d2
+
+#Make factor if sober or drunk
+trainSet$ifAlco = "sober"
+trainSet[trainSet$Dalc > 1,]$ifAlco = "drunk"
+trainSet[trainSet$Walc > 2,]$ifAlco = "drunk"
+trainSet$ifAlco = as.factor(trainSet$ifAlco)
+trainSet$Walc=NULL
+trainSet$Dalc=NULL
+
+validationSet$ifAlco = "sober"
+validationSet[validationSet$Dalc > 1,]$ifAlco = "drunk"
+validationSet[validationSet$Walc > 2,]$ifAlco = "drunk"
+validationSet$ifAlco = as.factor(validationSet$ifAlco)
 
 
-d1$ifAlco = "sober"
-d1[d1$Dalc > 1,]$ifAlco = "drunk"
-d1[d1$Walc > 2,]$ifAlco = "drunk"
-d1$ifAlco = as.factor(d1$ifAlco)
-d1_argsOnly= subset(d1, select = -c(Dalc,Walc))
-predictor.col = 1:ncol(d1_argsOnly)-1
 # Do Naive Bayes classification.
+nb = NaiveBayes(ifAlco ~ .,data=trainSet)
+nb_predict=predict(nb, testSet)
 
-library(klaR)
-nb = NaiveBayes(ifAlco ~ .,data=d1_2)
-nb_predict=predict(nb)
+#Perform TP TN FP FN table
+table(nb_predict$class,validationSet$ifAlco)
