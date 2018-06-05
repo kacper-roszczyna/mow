@@ -60,13 +60,13 @@ parameters$n_starts = as.integer(as.character(parameters$n_starts))
 parameters = parameters[order(parameters[,1], parameters[,2], parameters[,3]),]
 
 
-originsm = matrix(c(4,1,4,1), nrow=2, ncol=2)
+originsm = matrix(c(5,1,5,1), nrow=2, ncol=2)
 origins = data.frame(originsm)
 k_means_results = kmeans(x = for_clustering, 
                          centers = originsm, 
                          iter.max = 10, 
                          nstart = 100, 
-                         algorithm = c("MacQueen"), 
+                         algorithm = c("Hartigan-Wong"), 
                          trace=FALSE)
 k_means_centers = data.frame(matrix(unlist(k_means_results[2]), nrow=2, ncol = 2, byrow=F, dimnames = list(c(1, 2), c("Dalc", "Walc"))))
 print(k_means_centers)
@@ -162,3 +162,61 @@ ret.new <- EMCluster::assign.class(emclust_data, ret, return.all = FALSE)
 str(ret.new)
 emclust_data$cluster = ret.new$class
 plot(emclust_data[,1], emclust_data[,2], pch=16, col=emclust_data$cluster, xlab="Dalc", ylab="Walc")
+
+#Well none look too great. Let's try something a little different. Let's assume we have three clusters and two of them 
+#claim that the user is not a drunk
+
+k_means_results = kmeans(x = for_clustering, 
+                         centers = matrix(c(1,1,5,5,1,5), ncol=2, nrow=3), 
+                         iter.max = 1000, 
+                         nstart = 100, 
+                         algorithm = c("Hartigan-Wong"), 
+                         trace=FALSE)
+k_means_centers = data.frame(matrix(unlist(k_means_results[2]), nrow=3, ncol = 2, byrow=F, dimnames = list(c(1, 2, 3), c("Dalc", "Walc"))))
+k_means_centers$idx = c(1,2,3)
+print(k_means_centers)
+ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x, for_clustering$Walc.x, color=k_means_results$cluster)) + 
+  ggplot2::geom_count() + 
+  ggplot2::geom_point(mapping=ggplot2::aes(k_means_centers$Dalc, k_means_centers$Walc, color=c(1,2,3)), shape=18, size=7) +
+  ggplot2::labs(title = "Alcohol consumption clustering", 
+                subtitle = paste("max iterations:", as.character(1000), "\t",
+                                 "algorithm used:", as.character("Hartigan"),  "\t",
+                                 "starting clusters:", as.character(100), sep = " "),
+                y="Weekend consumption",
+                x="Daily consumption") +
+  ggplot2::coord_fixed()
+ggplot2::ggsave(paste("img/kmeans/kmeans", "3clusters", ".png", sep="_"))
+
+
+#Perhaps let's try a little bit of scaling do Dalc like an x^2 scale
+
+for_clustering_scaled = for_clustering
+for_clustering_scaled$Dalc.x = for_clustering_scaled$Dalc.x ^ 2
+k_means_results = kmeans(x = for_clustering_scaled, 
+                         centers = 2, 
+                         iter.max = 1000, 
+                         nstart = 100, 
+                         algorithm = c("Hartigan-Wong"), 
+                         trace=FALSE)
+k_means_centers = data.frame(matrix(unlist(k_means_results[2]), nrow=2, ncol = 2, byrow=F, dimnames = list(c(1, 2), c("Dalc", "Walc"))))
+print(k_means_centers)
+ggplot2::ggplot(mapping=ggplot2::aes(for_clustering_scaled$Dalc.x, for_clustering_scaled$Walc.x, color=k_means_results$cluster)) + 
+  ggplot2::geom_count() + 
+  ggplot2::geom_point(mapping=ggplot2::aes(k_means_centers$Dalc, k_means_centers$Walc, color=c(1,2)), shape=18, size=7) +
+  ggplot2::labs(title = "Alcohol consumption clustering", 
+                subtitle = paste("max iterations:", as.character(1000), "\t",
+                                 "algorithm used:", as.character("Hartigan"),  "\t",
+                                 "starting clusters:", as.character(100), sep = " "),
+                y="Weekend consumption",
+                x="Daily consumption") 
+ggplot2::ggsave(paste("img/kmeans/kmeans", "sclaed_clustering", ".png", sep="_"))
+
+
+
+
+
+
+
+
+
+
