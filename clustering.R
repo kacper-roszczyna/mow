@@ -59,6 +59,31 @@ parameters$iterations = as.integer(as.character(parameters$iterations))
 parameters$n_starts = as.integer(as.character(parameters$n_starts))
 parameters = parameters[order(parameters[,1], parameters[,2], parameters[,3]),]
 
+
+originsm = matrix(c(4,1,4,1), nrow=2, ncol=2)
+origins = data.frame(originsm)
+k_means_results = kmeans(x = for_clustering, 
+                         centers = originsm, 
+                         iter.max = 10, 
+                         nstart = 100, 
+                         algorithm = c("MacQueen"), 
+                         trace=FALSE)
+k_means_centers = data.frame(matrix(unlist(k_means_results[2]), nrow=2, ncol = 2, byrow=F, dimnames = list(c(1, 2), c("Dalc", "Walc"))))
+print(k_means_centers)
+ggplot2::ggplot(mapping=ggplot2::aes(for_clustering$Dalc.x, for_clustering$Walc.x, color=k_means_results$cluster)) + 
+  ggplot2::geom_count() + 
+  ggplot2::geom_point(mapping=ggplot2::aes(k_means_centers$Dalc, k_means_centers$Walc, color=c(1,2)), shape=18, size=7) +
+  ggplot2::geom_point(mapping=ggplot2::aes(origins$X1, origins$X2, color=-1)) +
+  ggplot2::labs(title = "Alcohol consumption clustering", 
+                subtitle = paste("max iterations:", as.character(10), "\t",
+                                 "algorithm used:", as.character("Hartigan"),  "\t",
+                                 "starting clusters:", as.character(100), sep = " "),
+                y="Weekend consumption",
+                x="Daily consumption") +
+  ggplot2::coord_fixed()
+ggplot2::ggsave(paste("img/kmeans/kmeans", "custom", ".png", sep="_"))
+
+
 #Run the algorithm for each parameter
 by(parameters, 1:nrow(parameters), function(row){
   print(row)
