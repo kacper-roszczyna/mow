@@ -49,4 +49,8 @@ nb = NaiveBayes(ifAlco ~ .,data=trainSet)
 nb_predict=predict(nb, testSet)
 
 #Perform TP TN FP FN table
-table(nb_predict$class,validationSet$ifAlco)
+result=table(nb_predict$class,validationSet$ifAlco)
+
+precision=result[2,2]/(result[2,2] + result[2,1])
+recall=result[2,2]/(result[2,2]+ result[1,2])
+Fmeasure=(2*recall*precision)/(recall+precision)
