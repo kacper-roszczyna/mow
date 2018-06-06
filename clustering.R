@@ -459,13 +459,12 @@ library(magrittr)
 library(dplyr)
 colnames(for_clustering) = c("D", "W")
 dclu = for_clustering %>% dplyr::add_count(for_clustering$D, for_clustering$W)
-dclu2 = dclu
 differ = duplicated(dclu)
 dclu = dclu[!duplicated(dclu), ]
 dclu = dclu[, c("D", "W", "n")]
 dclu$label <-
   paste(as.character(dclu$D), as.character(dclu$W), sep = "_")
-hclusters = hclust(dist(dclu2), "complete")
+hclusters = hclust(dist(dclu), "complete")
 plot(hclusters,
      labels = dclu$label,
      hang = -1,
